@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quotation Generator – Click Motorcycle Rental & Repair</title>
+  <style>
+    :root { --ink:#0f172a; --muted:#475569; --line:#e2e8f0; --brand:#0ea5e9; }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans",sans-serif;color:var(--ink);background:#fff}
+    .page{max-width:900px;margin:28px auto;padding:24px;background:#fff}
+    header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border-bottom:2px solid var(--line);padding-bottom:16px}
+    h1{margin:0;font-size:28px;letter-spacing:1px}
+    .subtle{color:var(--muted);font-size:13px}
+    label{font-size:13px;color:var(--muted)}
+    input, select, textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:14px}
+    textarea{min-height:60px}
+    .grid{display:grid;gap:14px}
+    .g2{grid-template-columns:1fr 1fr}
+    .g3{grid-template-columns:repeat(3,1fr)}
+    .bar{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:#fff;cursor:pointer}
+    .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+    .btn.danger{border-color:#ef4444;color:#ef4444}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{border-bottom:1px solid var(--line);padding:10px;text-align:left;font-size:14px}
+    tfoot td{border:0}
+    .num{text-align:right}
+    .right{margin-left:auto}
+    .card{border:1px solid var(--line);padding:16px;border-radius:14px}
+    .brand-block{font-size:13px}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    @media print{
+      .no-print{display:none !important}
+      body{background:#fff}
+      .page{box-shadow:none;margin:0}
+      input, textarea, select{border:0;padding:0}
+      th,td{padding:8px}
+    }
+  </style>
+</head>
+<body>
+  <div class="page" id="page">
+    <header>
+      <div>
+        <h1>QUOTATION</h1>
+        <div class="subtle">Click Motorcycle Rental & Repair – Store 390, Mussafah 03, Abu Dhabi, UAE</div>
+        <div class="subtle">Email: — | Phone: —</div>
+      </div>
+      <div class="brand-block">
+        <div><label>Quotation No</label>
+          <input id="qNo" class="mono" /></div>
+        <div class="grid g2" style="margin-top:8px">
+          <div><label>Date</label>
+            <input id="qDate" type="date" /></div>
+          <div><label>Valid Until</label>
+            <input id="qValid" type="date" /></div>
+        </div>
+      </div>
+    </header>
+
+    <section style="margin-top:18px" class="grid g2">
+      <div class="card">
+        <div class="grid g2">
+          <div>
+            <label>Client / Attention To</label>
+            <input id="client" placeholder="e.g., Sheikh Hamdan Bin Zayed" />
+          </div>
+          <div>
+            <label>Company</label>
+            <input id="company" placeholder="e.g., Electric Club Car / Fleet" />
+          </div>
+        </div>
+        <div class="grid g2" style="margin-top:12px">
+          <div>
+            <label>Address</label>
+            <input id="addr" placeholder="e.g., Abu Dhabi, UAE" />
+          </div>
+          <div>
+            <label>Contact</label>
+            <input id="contact" placeholder="e.g., +971…" />
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="grid g3">
+          <div>
+            <label>Currency</label>
+            <select id="currency">
+              <option value="AED">AED</option>
+              <option value="USD">USD</option>
+              <option value="CAD">CAD</option>
+            </select>
+          </div>
+          <div>
+            <label>Tax %</label>
+            <input id="tax" type="number" step="0.01" value="5" />
+          </div>
+          <div>
+            <label>Service Charges</label>
+            <input id="svc" type="number" step="0.01" value="0" />
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <label>Payment Terms</label>
+          <input id="terms" value="50% advance, balance upon completion." />
+        </div>
+      </div>
+    </section>
+
+    <section style="margin-top:18px">
+      <div class="bar no-print">
+        <button class="btn primary" onclick="addRow()">+ Add Item</button>
+        <button class="btn" onclick="clearRows()">Clear Items</button>
+        <span class="right"></span>
+        <button class="btn" onclick="saveDraft()">Save Draft</button>
+        <button class="btn" onclick="loadDraft()">Load Draft</button>
+        <button class="btn danger" onclick="eraseDraft()">Erase Draft</button>
+      </div>
+      <table id="itemsTbl">
+        <thead>
+          <tr>
+            <th style="width:80px">Item No.</th>
+            <th>Description</th>
+            <th style="width:120px">Quantity</th>
+            <th style="width:140px">Unit Price</th>
+            <th style="width:160px">Total</th>
+            <th class="no-print" style="width:60px"></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4" class="num">Subtotal</td>
+            <td class="num mono" id="subtotal">0.00</td>
+            <td class="no-print"></td>
+          </tr>
+          <tr>
+            <td colspan="4" class="num">Service charges</td>
+            <td class="num mono" id="svcOut">0.00</td>
+            <td class="no-print"></td>
+          </tr>
+          <tr>
+            <td colspan="4" class="num">Tax (<span id="taxOut">5</span>%)</td>
+            <td class="num mono" id="taxAmt">0.00</td>
+            <td class="no-print"></td>
+          </tr>
+          <tr>
+            <td colspan="4" class="num"><strong>Total Amount</strong></td>
+            <td class="num mono" id="grand"><strong>0.00</strong></td>
+            <td class="no-print"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+
+    <section style="margin-top:18px" class="grid g2">
+      <div class="card">
+        <strong>Bank Details</strong>
+        <div class="subtle" style="margin-top:6px">Account Name</div>
+        <div contenteditable id="bankName">Click Motorcycle Rental &amp; Repair</div>
+        <div class="subtle" style="margin-top:6px">Bank</div>
+        <div contenteditable id="bank">ADCB BANK</div>
+        <div class="subtle" style="margin-top:6px">Account No.</div>
+        <div contenteditable id="iban">13346556820001</div>
+      </div>
+      <div class="card">
+        <label>Notes</label>
+        <textarea id="notes" placeholder="Any additional notes…"></textarea>
+      </div>
+    </section>
+
+    <section class="no-print" style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn" onclick="newNumber()">New Quotation Number</button>
+      <button class="btn primary" onclick="printPDF()">Generate PDF</button>
+      <span class="subtle">Tip: On the print dialog, choose <em>Save as PDF</em>.</span>
+    </section>
+  </div>
+
+  <script>
+    const tbody = document.getElementById('tbody');
+    const taxEl = document.getElementById('tax');
+    const svcEl = document.getElementById('svc');
+
+    function fmt(n){
+      return new Intl.NumberFormat(undefined,{minimumFractionDigits:2, maximumFractionDigits:2}).format(Number(n||0));
+    }
+
+    function addRow(desc='', qty='', price=''){
+      const row = document.createElement('tr');
+      const idx = tbody.children.length + 1;
+      row.innerHTML = `
+        <td class="mono">${idx}</td>
+        <td><input value="${desc}" placeholder="e.g., Battery" oninput="calc()"/></td>
+        <td><input type="number" step="0.01" value="${qty}" oninput="calc()"/></td>
+        <td><input type="number" step="0.01" value="${price}" oninput="calc()"/></td>
+        <td class="num mono">0.00</td>
+        <td class="no-print"><button class="btn" onclick="this.closest('tr').remove(); renumber(); calc();">✕</button></td>
+      `;
+      tbody.appendChild(row);
+      calc();
+    }
+
+    function renumber(){
+      [...tbody.querySelectorAll('tr')].forEach((tr,i)=>{
+        tr.firstElementChild.textContent = i+1;
+      });
+    }
+
+    function clearRows(){ tbody.innerHTML=''; calc(); }
+
+    function calc(){
+      let subtotal = 0;
+      [...tbody.rows].forEach(tr=>{
+        const qty = parseFloat(tr.children[2].querySelector('input').value)||0;
+        const price = parseFloat(tr.children[3].querySelector('input').value)||0;
+        const tot = qty*price;
+        tr.children[4].textContent = fmt(tot);
+        subtotal += tot;
+      });
+      const svc = parseFloat(svcEl.value)||0;
+      const tax = parseFloat(taxEl.value)||0;
+      document.getElementById('subtotal').textContent = fmt(subtotal);
+      document.getElementById('svcOut').textContent = fmt(svc);
+      document.getElementById('taxOut').textContent = tax.toFixed(2).replace(/\.00$/,'');
+      const taxable = subtotal + svc;
+      const taxAmt = taxable * (tax/100);
+      document.getElementById('taxAmt').textContent = fmt(taxAmt);
+      document.getElementById('grand').textContent = fmt(taxable + taxAmt);
+      saveAuto();
+    }
+
+    taxEl.addEventListener('input', calc);
+    svcEl.addEventListener('input', calc);
+
+    function today(){
+      const d = new Date();
+      d.setHours(0,0,0,0);
+      return d.toISOString().slice(0,10);
+    }
+    function addDays(dateStr, days){
+      const d = new Date(dateStr);
+      d.setDate(d.getDate()+days);
+      return d.toISOString().slice(0,10);
+    }
+
+    function newNumber(){
+      const last = parseInt(localStorage.getItem('lastQuoteNo')||'226',10);
+      const next = last + 1;
+      const code = `CDS${next}`;
+      document.getElementById('qNo').value = code;
+      localStorage.setItem('lastQuoteNo', String(next));
+    }
+
+    function printPDF(){ window.print(); }
+
+    function saveDraft(){
+      const data = collect();
+      localStorage.setItem('quoteDraft', JSON.stringify(data));
+      alert('Draft saved on this device.');
+    }
+    function loadDraft(){
+      const raw = localStorage.getItem('quoteDraft');
+      if(!raw){ alert('No draft found.'); return; }
+      restore(JSON.parse(raw));
+    }
+    function eraseDraft(){
+      localStorage.removeItem('quoteDraft');
+      alert('Draft erased from this device.');
+    }
+    function saveAuto(){
+      const data = collect();
+      localStorage.setItem('quoteDraft', JSON.stringify(data));
+    }
+    function collect(){
+      const rows = [...tbody.rows].map(tr=>({
+        desc: tr.children[1].querySelector('input').value,
+        qty: tr.children[2].querySelector('input').value,
+        price: tr.children[3].querySelector('input').value,
+      }));
+      return {
+        qNo: document.getElementById('qNo').value,
+        qDate: document.getElementById('qDate').value,
+        qValid: document.getElementById('qValid').value,
+        client: document.getElementById('client').value,
+        company: document.getElementById('company').value,
+        addr: document.getElementById('addr').value,
+        contact: document.getElementById('contact').value,
+        currency: document.getElementById('currency').value,
+        tax: document.getElementById('tax').value,
+        svc: document.getElementById('svc').value,
+        terms: document.getElementById('terms').value,
+        bankName: document.getElementById('bankName').innerText,
+        bank: document.getElementById('bank').innerText,
+        iban: document.getElementById('iban').innerText,
+        notes: document.getElementById('notes').value,
+        rows
+      }
+    }
+    function restore(d){
+      document.getElementById('qNo').value = d.qNo||'';
+      document.getElementById('qDate').value = d.qDate||today();
+      document.getElementById('qValid').value = d.qValid||addDays(d.qDate||today(), 7);
+      document.getElementById('client').value = d.client||'';
+      document.getElementById('company').value = d.company||'';
+      document.getElementById('addr').value = d.addr||'';
+      document.getElementById('contact').value = d.contact||'';
+      document.getElementById('currency').value = d.currency||'AED';
+      document.getElementById('tax').value = d.tax||'5';
+      document.getElementById('svc').value = d.svc||'0';
+      document.getElementById('terms').value = d.terms||'50% advance, balance upon completion.';
+      document.getElementById('bankName').innerText = d.bankName||'Click Motorcycle Rental & Repair';
+      document.getElementById('bank').innerText = d.bank||'ADCB BANK';
+      document.getElementById('iban').innerText = d.iban||'13346556820001';
+      document.getElementById('notes').value = d.notes||'';
+      tbody.innerHTML='';
+      (d.rows||[]).forEach(r=>addRow(r.desc,r.qty,r.price));
+      if((d.rows||[]).length===0){ addRow(); }
+      calc();
+    }
+
+    (function(){
+      const qDate = document.getElementById('qDate');
+      const qValid = document.getElementById('qValid');
+      qDate.value = today();
+      qValid.value = addDays(qDate.value, 7);
+      qDate.addEventListener('change', ()=>{ qValid.value = addDays(qDate.value, 7); });
+
+      if(!localStorage.getItem('lastQuoteNo')){
+        localStorage.setItem('lastQuoteNo','226');
+      }
+      newNumber();
+      addRow();
+    })();
+  </script>
+</body>
+</html>
